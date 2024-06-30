@@ -1,0 +1,18 @@
+{% load static i18n %}
+{% load render_bundle from webpack_loader %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="{% static "icons/favicon.ico" %}">
+  <title>TodoApp</title>
+</head>
+<body>
+<noscript><strong>Visit Control не работает корректно без поддержки JavaScript.</strong></noscript>
+<div id="app"></div>
+{% render_bundle 'app' %}
+</body>
+</html>
+</html>

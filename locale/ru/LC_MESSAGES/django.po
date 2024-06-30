@@ -1,0 +1,123 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-07-10 12:59+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+#: visit_control/api_v1/accounts/serializers.py
+msgid "User account is disabled."
+msgstr ""
+
+#: visit_control/api_v1/accounts/serializers.py
+msgid "Unable to log in with provided credentials."
+msgstr ""
+
+#: visit_control/api_v1/accounts/serializers.py
+msgid "Password"
+msgstr ""
+
+#: visit_control/api_v1/accounts/views.py
+msgid "Invalid password"
+msgstr ""
+
+#: visit_control/api_v1/accounts/views.py
+msgid "The new password cannot be the same as the old password"
+msgstr ""
+
+#: visit_control/api_v1/apps.py
+msgid "API"
+msgstr ""
+
+#: visit_control/api_v1/handlers_views.py
+msgid "Request error"
+msgstr ""
+
+
+
+#: visit_control/main/apps.py
+msgid "Todos app"
+msgstr ""
+
+
+#: visit_control/main/handlers/todos/data_handler.py visit_control/utils/handler.py
+msgid "Todo not found"
+msgstr ""
+
+#: visit_control/main/models.py
+msgid "Author"
+msgstr ""
+
+#: visit_control/main/models.py
+msgid "Name"
+msgstr ""
+
+#: visit_control/main/models.py
+msgid "Note"
+msgstr ""
+
+#: visit_control/main/models.py
+msgid "Notes"
+msgstr ""
+
+#: visit_control/main/models.py
+msgid "Text"
+msgstr ""
+
+#: visit_control/main/models.py
+msgid "Done"
+msgstr ""
+
+#: visit_control/main/models.py
+msgid "Todo"
+msgstr ""
+
+#: visit_control/main/models.py
+msgid "Todos"
+msgstr ""
+
+#: visit_control/permissions/apps.py
+msgid "Permissions"
+msgstr ""
+
+#: visit_control/permissions/permissions.py
+msgid "User has no permissions to do this"
+msgstr ""
+
+#: visit_control/users/apps.py visit_control/users/models.py
+msgid "Users"
+msgstr ""
+
+#: visit_control/users/models.py
+msgid "Russian"
+msgstr ""
+
+#: visit_control/users/models.py
+msgid "English"
+msgstr ""
+
+#: visit_control/users/models.py
+msgid "User language"
+msgstr ""
+
+#: visit_control/users/models.py
+msgid "User"
+msgstr ""
+
+#: visit_control/utils/handler.py
+msgid "Note not found"
+msgstr ""
