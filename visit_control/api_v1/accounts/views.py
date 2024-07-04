@@ -10,7 +10,7 @@ from rest_framework.pagination import PageNumberPagination
 from visit_control.api_v1.accounts.serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
-    ReadUserSerializer,
+    ReadAccountSerializer,
     WriteGetAccountSerializer,
     WriteAddAccountSerializer,
     WriteUpdateAccountSerializer,
@@ -38,7 +38,7 @@ class CustomSizePagination(PageNumberPagination):
     get=extend_schema(
         summary="Данные о текущем пользователе",
         responses={
-            status.HTTP_200_OK: ReadUserSerializer,
+            status.HTTP_200_OK: ReadAccountSerializer,
             status.HTTP_403_FORBIDDEN: DummyDetailAndStatusSerializer,
         },
     ),
@@ -48,7 +48,7 @@ class GetMeView(GenericAPIView):
     def get(self, request, *args, **kwargs):
         return JsonResponse(
             status=status.HTTP_200_OK,
-            data=ReadUserSerializer(request.user).data,
+            data=ReadAccountSerializer(request.user).data,
         )
 
 
@@ -135,7 +135,7 @@ class ChangePasswordView(GenericAPIView):
     get=extend_schema(
         summary="Просмотр списка аккаунтов",
         responses={
-            status.HTTP_200_OK: ReadUserSerializer(many=True),
+            status.HTTP_200_OK: ReadAccountSerializer(many=True),
             status.HTTP_400_BAD_REQUEST: DummyDetailSerializer,
             status.HTTP_401_UNAUTHORIZED: DummyDetailSerializer,
             status.HTTP_403_FORBIDDEN: DummyDetailAndStatusSerializer,
@@ -153,7 +153,7 @@ class AccountsView(HandlerView, ListAPIView):
     def get_queryset(self):
         """Получение множества объектов Users."""
         self.error_text = _("Get Users error")
-        self.read_serializer_class = ReadUserSerializer
+        self.read_serializer_class = ReadAccountSerializer
         self.response_code = status.HTTP_200_OK
         self.handler = GetAccountsHandler
         return self.get_handler_result()
@@ -166,7 +166,7 @@ class AccountsView(HandlerView, ListAPIView):
         summary="Добавление аккаунта",
         request=WriteAddAccountSerializer,
         responses={
-            status.HTTP_201_CREATED: ReadUserSerializer,
+            status.HTTP_201_CREATED: ReadAccountSerializer,
             status.HTTP_400_BAD_REQUEST: DummyDetailSerializer,
             status.HTTP_401_UNAUTHORIZED: DummyDetailSerializer,
             status.HTTP_403_FORBIDDEN: DummyDetailAndStatusSerializer,
@@ -189,7 +189,7 @@ class AccountView(HandlerView):
         summary="Данные указанного аккаунта",
         request=WriteGetAccountSerializer,
         responses={
-            status.HTTP_200_OK: ReadUserSerializer,
+            status.HTTP_200_OK: ReadAccountSerializer,
             status.HTTP_400_BAD_REQUEST: DummyDetailSerializer,
             status.HTTP_401_UNAUTHORIZED: DummyDetailSerializer,
             status.HTTP_403_FORBIDDEN: DummyDetailAndStatusSerializer,
@@ -200,7 +200,7 @@ class AccountView(HandlerView):
         self.response_code = status.HTTP_200_OK
         self.serializer_class = WriteGetAccountSerializer
         self.error_text = _("Get Account error")
-        self.read_serializer_class = ReadUserSerializer
+        self.read_serializer_class = ReadAccountSerializer
         self.handler = GetAccountHandler
         return self.handle()
 
@@ -208,7 +208,7 @@ class AccountView(HandlerView):
         summary="Обновление данных указанного аккаунта. Возможно частичное.",
         request=WriteUpdateAccountSerializer,
         responses={
-            status.HTTP_200_OK: ReadUserSerializer,
+            status.HTTP_200_OK: ReadAccountSerializer,
             status.HTTP_400_BAD_REQUEST: DummyDetailSerializer,
             status.HTTP_401_UNAUTHORIZED: DummyDetailSerializer,
             status.HTTP_403_FORBIDDEN: DummyDetailAndStatusSerializer,
@@ -218,7 +218,7 @@ class AccountView(HandlerView):
         """ Изменение записи """
         self.response_code = status.HTTP_200_OK
         self.serializer_class = WriteUpdateAccountSerializer
-        self.read_serializer_class = ReadUserSerializer
+        self.read_serializer_class = ReadAccountSerializer
         self.error_text = _("Update Account error")
         self.handler = UpdateAccountHandler
         return self.handle()

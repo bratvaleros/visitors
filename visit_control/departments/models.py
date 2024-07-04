@@ -8,8 +8,9 @@ User = get_user_model()
 
 class Department(models.Model):
 
-    name = models.CharField(max_length=30, verbose_name=_("Наименование подразделения"))
-    parent = models.ForeignKey('self', verbose_name=_("Входит в состав"), on_delete=models.CASCADE, related_name="departments")
+    name = models.CharField(max_length=100, verbose_name=_("Наименование подразделения"))
+    parent = models.ForeignKey('self', verbose_name=_("Входит в состав"), on_delete=models.CASCADE,
+                               blank=True, null=True, related_name="departments")
 
     def __str__(self):
         return self.name

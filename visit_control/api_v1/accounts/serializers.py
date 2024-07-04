@@ -1,12 +1,12 @@
 from dj_rest_auth.serializers import LoginSerializer as DefaultLoginSerializer
-#from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
-from visit_control.accounts.models import User
-#User = get_user_model()
+
+User = get_user_model()
 
 
 class LoginSerializer(DefaultLoginSerializer):
@@ -48,7 +48,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         return attrs
 
 
-class ReadUserSerializer(serializers.ModelSerializer):
+class ReadAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "first_name", "is_active", "is_superuser", "last_login")

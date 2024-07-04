@@ -85,10 +85,10 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "visit_control.departments.apps.MainConfig",
+    "visit_control.departments.apps.DepartmentConfig",
     "visit_control.api_v1.apps.ApiV1Config",
     "visit_control.permissions.apps.PermissionsConfig",
-    "visit_control.accounts.apps.UsersConfig",
+    "visit_control.accounts.apps.AccountsConfig",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -131,7 +131,7 @@ REST_FRAMEWORK = {
 MIGRATION_MODULES = {"sites": "visit_control.contrib.sites.migrations"}
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
-AUTH_USER_MODEL = "users.User"
+AUTH_USER_MODEL = "accounts.Account"
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 LOGIN_REDIRECT_URL = "/"

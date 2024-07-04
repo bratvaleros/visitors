@@ -10,5 +10,5 @@ class CreateDepartmentService(ServiceObject):
 
     @transactional
     @service_call
-    def __call__(self, name:) -> Union[Ok, Error]:
+    def __call__(self, name) -> Union[Ok, Error]:
         return self.success(name=name) | self.create_client
