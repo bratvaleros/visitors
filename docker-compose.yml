@@ -12,11 +12,6 @@ services:
       - "5432:5432"
 
   visitors_service:
-
-
-
-
-
     image: visitors:v1.0.0.0
     environment:
       - DATABASE_URL=postgresql://visitors:visitors@db/visitors
@@ -28,6 +23,6 @@ services:
     volumes:
       - ./VISITORS_LOGS:/var/log/spectacular
     ports:
-      - "8443:8443"
+      - "443:8443"
     depends_on:
       - db

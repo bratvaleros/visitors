@@ -1,0 +1,274 @@
+Исходная статья на HABR - https://habr.com/ru/articles/686230/
+
+Структура каталогов для выпуска сертификатов
+├──/code
+│   ├── /ca_root - корневой, главный УЦ
+│   │   ├── openssl.conf - конфиг корневого УЦ
+│   │   ├── index.txt - база данных сертификатов
+│   │   ├── serial - счетчик серийных номеров
+│   │   ├── /pub - каталог с открытыми ключами
+│   │   ├── /priv - каталог с закрытыми ключами
+│   │   ├── /newcerts - каталог с подписанными сертификатами
+│   │ 
+│   ├── /ca1 - промежуточный УЦ
+│   │   ├── openssl.conf - конфиг промежуточного УЦ
+│   │   ├── index.txt - база данных сертификатов
+│   │   ├── serial - счетчик серийных номеров
+│   │   ├── /pub - каталог с открытыми ключами
+│   │   ├── /priv - каталог с закрытыми ключами
+│   │   ├── /newcerts - каталог с подписанными сертификатами
+│   │   ├── /csr - каталог с запросами на подпись
+│   │   ├── /psk12 - каталог с ключевыми парами
+
+1) создаём структуру каталогов
+cd /code
+mkdir -p {ca_root,ca1}/{pub,priv,newcerts}
+echo 1000 > ca_root/serial
+echo 1000 > ca1/serial
+touch  {ca_root,ca1}/{index.txt,openssl.conf}
+mkdir ca1/{csr,psk12}
+
+2) ===========================================ФАЙЛ КОНФИГУРАЦИИ КОРНЕВОГО ЦЕНТРА СЕРТИФИКАЦИИ /code/ca_root/openssl.conf========================================
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir               = /code/ca_root #папка с нашим УЦ
+certs             = $dir/priv
+#crl_dir           = $dir/crl
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+RANDFILE          = $dir/priv/.rand
+#подписывающие серты
+private_key       = $dir/priv/ca.key
+certificate       = $dir/pub/ca.crt
+default_md        = sha256
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 375
+preserve          = no
+policy            = policy_strict
+
+[ policy_strict ]
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = optional
+emailAddress            = optional
+
+
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+x509_extensions     = v3_ca
+
+[ req_distinguished_name ]
+countryName                     = Country Name (2 letter code)
+stateOrProvinceName             = State or Province Name
+localityName                    = Locality Name
+organizationName                = Organization Name
+organizationalUnitName          = Organizational Unit Name
+commonName                      = Common Name
+emailAddress                    = Email Address
+
+# дефолтные значения
+countryName_default             = RU
+stateOrProvinceName_default     = Russia
+localityName_default            = Russia
+organizationName_default       = MyHomeLab
+
+[ v3_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ v3_intermediate_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+===========================================ФАЙЛ /code/ca_root/openssl.conf========================================
+
+3) сгенерируем приватный ключ, у нас спросит пароль, не забывайте его, он будет требоваться для дальнейших манипуляций
+
+cd /code/ca_root
+openssl genrsa -aes256 -out priv/ca.key 4096
+указать пароль - например, swordfish
+
+
+4) Создадим самоподписанный корневой сертификат (указываем CNAME, он же COMMON NAME, HomeLabCA)
+cd /code/ca_root
+openssl req -config openssl.conf -key priv/ca.key -new -x509 -days 7300 -sha256 -extensions v3_ca -out pub/ca.crt
+
+
+5) ===========================================ФАЙЛ КОНФИГУРАЦИИ ПРОМЕЖУТОЧНОГО ЦЕНТРА СЕРТИФИКАЦИИ /code/ca1/openssl.conf========================================
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir               = /code/ca1 # папка промежуточного цс
+certs             = $dir/pub
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+RANDFILE          = $dir/priv/.rand
+
+private_key       = $dir/priv/ca1.key
+certificate       = $dir/pub/ca1.crt
+
+default_md        = sha256
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 375
+preserve          = no
+policy            = policy_loose
+unique_subject = no
+
+
+[ policy_loose ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+x509_extensions     = v3_ca
+
+[ req_distinguished_name ]
+countryName                     = Country Name (2 letter code)
+stateOrProvinceName             = State or Province Name
+localityName                    = Locality Name
+organizationName                = Organization Name
+organizationalUnitName          = Organizational Unit Name
+commonName                      = Common Name
+emailAddress                    = Email Address
+
+# значения по-умолчанию
+countryName_default             = RU
+stateOrProvinceName_default     = Russia
+localityName_default            = Russia
+organizationName_default        = MyHomeLab1
+
+[ v3_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ v3_intermediate_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ usr_cert ]
+basicConstraints = CA:FALSE
+nsCertType = client, email
+nsComment = "OpenSSL Generated Client Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, emailProtection
+
+[ server_cert ]
+basicConstraints = CA:FALSE
+nsCertType = server
+nsComment = "OpenSSL Generated Server Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName=${ENV::SAN}
+===========================================ФАЙЛ /code/ca1/openssl.conf========================================
+
+6) генерируем приватный ключ, только уже для промежуточного ЦС, запоминаем пароль для ключа. Объявляемпустое значение для переменной окружения, иначе openssl будет ругаться
+export SAN=
+cd /code/ca1
+openssl genrsa -aes256 -out priv/ca1.key 4096
+
+7) Дальше мы уже будем создавать подписанный сертификат, поэтому, создаем запрос на подписание сертификата, тут нам понадобится пароль от ключа /code/ca1/priv/ca1.key
+(указываем CNAME, он же COMMON NAME, HomeLabCA1)
+cd /code/ca1
+openssl req -config openssl.conf -new -sha256 -key priv/ca1.key -out csr/ca1.csr
+
+
+8) Далее подписываем промежуточный сертификат корневым сертификатом
+openssl ca -config /code/ca_root/openssl.conf -extensions v3_intermediate_ca -days 3650 -notext -md sha256 -in /code/ca1/csr/ca1.csr -out /code/ca1/pub/ca1.crt
+
+=========================== Генерация серверного сертификата =================================
+9) генерируем приватный ключ, только тут упущена опция -aes256, поэтому ключ будет без пароля, это всё чтобы не вводить пароль при перезагрузке nginx
+cd /code/ca1
+openssl genrsa -out priv/visitors.local.key 2048
+
+10) создаем запрос на подпись, указываем cname=visitors.local
+openssl req -config openssl.conf -key priv/visitors.local.key -new -sha256 -out csr/visitors.local.csr
+
+11) Теперь подписываем промежуточным сертификатом наш серверный visitors.local, но предварительно заполним переменную окружения SAN (IP можно указывать любой)
+export SAN=DNS:visitors.local,IP:192.168.200.10
+openssl ca -config openssl.conf -extensions server_cert -days 375 -notext -md sha256 -in csr/visitors.local.csr -out pub/visitors.local.crt
+
+
+============================ Цепочки сертификатов =========================================
+Цепочка сертификатов включает себя все промежуточные центры сертификации вплоть до корневого.
+Каждый сертификат начинается с -----BEGIN CERTIFICATE----- и заканчивается -----END CERTIFICATE-----
+В данном случае полная цепочка для серверного сертификата будет выглядеть так:
+-----BEGIN CERTIFICATE-----
+сам серверный сертификат
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+сертификат промежуточного ЦС
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+сертификат корневого ЦС
+-----END CERTIFICATE-----
+
+12) Создадим сперва цепочку для промежуточного, добавив туда корневой (открытый) сертификат
+cat /code/ca1/pub/ca1.crt /code/ca_root/pub/ca.crt > /code/ca1/pub/ca1_chain.crt
+
+13) Далее создадим цепочку для серверного сертификата
+cat /code/ca1/pub/visitors.local.crt /code/ca1/pub/ca1_chain.crt > /code/ca1/pub/visitors.local_chain.crt
+
+
+14) Настройка NGINX
+Файл /code/ca1/pub/visitors.local_chain.crt размещаем тут /code/server_public.crt
+Файл /code/ca1/priv/visitors.local.key размещаем тут /code/visitors_private.key
+================ ФАЙЛ КОНФИГУРАЦИИ NGINX (указаны только опции касающиеся сертификатов) ===================
+http {
+  server {
+      listen 8443 ssl http2;
+      server_name visitors.local;
+      ssl_certificate     /code/server_public.crt;
+      ssl_certificate_key /code/visitors_private.key;
+      ssl_verify_client off;
+  }
+}
+================ ФАЙЛ КОНФИГУРАЦИИ NGINX (указаны только опции касающиеся сертификатов) ===================
+
+
+15) Сертификат /code/ca_root/pub/ca.crt необходимо добавить в хранилище сертификатов в операционной системе каждого хоста с которого будет осуществляться доступ к серверу.
+Иначе YandexBrowser будет ругаться что он не знает такого корневого центра сертификации, хотя остальные браузеры понимают цепочку и рисуют серый замочек в адресной строке, рядом с доменным именем.
+Установить сертификат - правая кнопка мыши на файле "ca.crt" и выбрать пункт меню "Установить сертификат".
+Устанавливать сертификат лучше два раза, в хранилище "текущий пользовател" и в хранилище "локальный компьютер", 
+выбрать пункт "поместить все сертификаты в следующее хранилище" и затем "обзор" и выбрать в дереве "доверенные корневые центры сертификации".
+
+Открыть консоль MMC (mmc.exe)
+Файл -> Добавить или удалить оснастку
+Слева выбрать "Сертификаты", в середине кнопка "добавить", пункт "моей учетной записи пользователя"
+Слева выбрать "Сертификаты", в середине кнопка "добавить", пункт "учетной записи компьютера", оснастка всегда управляет "локальным компьютером"
+Далее "ОК"
+
+В пунктах "Сертификаты" - "Доверенные корневые центры сертификации" - "Сертификаты" обоих оснасток можно посмотреть список сертификатов и содержимое выбранного сертификата.
+Сертификаты можно перемещать между хранилищами.
+
